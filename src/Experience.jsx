@@ -3,8 +3,8 @@ import { Vector2, Matrix4 } from "three"
 import { useThree } from "@react-three/fiber"
 import { OrbitControls, useFBO } from "@react-three/drei"
 
-import vertexShader from "./shaders/vertexShader.js"
-import fragmentShader from "./shaders/fragmentShader.js"
+import vertexShader from "./shaders/cube/vertexShader.js"
+import fragmentShader from "./shaders/cube/fragmentShader.js"
 
 export default function Experience() {
   const meshRef = useRef()
