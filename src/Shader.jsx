@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, useState } from "react"
 import { Vector2, Matrix4 } from "three"
 import { useThree } from "@react-three/fiber"
 import { useFBO } from "@react-three/drei"
@@ -12,6 +12,8 @@ export default function Shader({ position }) {
   const viewport = useThree((state) => state.viewport)
   const scene = useThree((state) => state.scene)
   const camera = useThree((state) => state.camera)
+
+  const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
   const uniforms = useMemo(
     () => ({

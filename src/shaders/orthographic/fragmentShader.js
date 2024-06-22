@@ -53,24 +53,24 @@ float opSmoothUnion( float d1, float d2, float k ) {
 
 #define BALL_NUM 5
 
-// float GetDist(vec3 p) {
-
-// 	float d = length(p) - 1.; // sphere
-// 	d = length(vec2(length(p.xz) - .4, p.y)) - .1;
-// 	return d;
-// }
-
 float GetDist(vec3 p) {
-	float d = 1e5;
-	for(int i = 0; i < BALL_NUM; i++) {
-		float fi = float(i) + 0.01;
-		float r = uSize * 0.1;
-		// float r = uSize * 0.1 * hash(fi);
-		vec3 offset = .5 * sin(hash3(fi)) * cos(uTime + float(i));
-		d = opSmoothUnion(d, sphere(p - offset, r), 0.24);
-	}
+
+	float d = length(p) - 1.; // sphere
+	d = length(vec2(length(p.xz) - .4, p.y)) - .1;
 	return d;
 }
+
+// float GetDist(vec3 p) {
+// 	float d = 1e5;
+// 	for(int i = 0; i < BALL_NUM; i++) {
+// 		float fi = float(i) + 0.01;
+// 		float r = uSize * 0.1;
+// 		// float r = uSize * 0.1 * hash(fi);
+// 		vec3 offset = .5 * sin(hash3(fi)) * cos(uTime + float(i));
+// 		d = opSmoothUnion(d, sphere(p - offset, r), 0.24);
+// 	}
+// 	return d;
+// }
 
 float Raymarch(vec3 ro, vec3 rd) {
 	float dO = 0.;
@@ -97,24 +97,26 @@ vec3 GetNormal(in vec3 p) {
 	void main() {
 
 		vec2 uv = vUv - 0.5;
-		// vec3 ro = vRayOrigin.xyz; //vec3(0., 0., -3.);
-		// vec3 rd = normalize(vHitPos - ro); //normalize(vec3(uv, 1.));
+		// vec3 ro = vec3(0., 0., -3.);
+		// vec3 rd = normalize(vec3(uv, 1.));
+		vec3 ro = vRayOrigin.xyz; //vec3(0., 0., -3.);
+		vec3 rd = normalize(vHitPos - ro); //normalize(vec3(uv, 1.));
 
-		// float d = Raymarch(ro, rd);
+		float d = Raymarch(ro, rd);
 
-		// vec3 col = vec3(0.0);
+		vec3 col = vec3(0.0);
 
-		// if ( d >= MAX_DIST )
-		// 	discard;
-		// else {
-		// 	vec3 p = ro + rd * d;
-		// 	vec3 n = GetNormal(p);
-		// 	col.rgb = n;
-		// }
-        // gl_FragColor = vec4(col, 1.0);
+		if ( d >= MAX_DIST )
+			discard;
+		else {
+			vec3 p = ro + rd * d;
+			vec3 n = GetNormal(p);
+			col.rgb = n;
+		}
+        gl_FragColor = vec4(col, 1.0);
         // gl_FragColor = vec4(rd, 1.0);
 		// gl_FragColor = vec4(0., 0., 1., 1.0);
-		gl_FragColor = vec4(uv, 0.0, 1.0);
+		// gl_FragColor = vec4(uv, 0.0, 1.0);
 	}
 `
 
