@@ -6,7 +6,7 @@ import { OrbitControls } from "@react-three/drei"
 import vertexShader from "./shaders/cube/vertexShader.js"
 import fragmentShader from "./shaders/cube/fragmentShader.js"
 
-export default function Experience() {
+export default function Experience({ position }) {
   const meshRef = useRef()
   const viewport = useThree((state) => state.viewport)
   const camera = useThree((state) => state.camera)
@@ -18,32 +18,6 @@ export default function Experience() {
   const updateMousePosition = useCallback((e) => {
     mousePosition.current = { x: e.pageX, y: e.pageY }
   }, [])
-
-  const uniforms = useMemo(
-    () => ({
-      uCamPos: { value: camera.position },
-      uCamToWorldMat: { value: camera.matrixWorld },
-      uCamInverseProjMat: { value: camera.projectionMatrixInverse },
-      uInverseModelMat: {
-        value: new Matrix4(),
-      },
-      uTime: {
-        type: "f",
-        value: 1.0,
-      },
-      uMouse: {
-        type: "v2",
-        value: new Vector2(0, 0),
-      },
-      uResolution: {
-        type: "v2",
-        value: new Vector2(viewport.width, viewport.height).multiplyScalar(
-          Math.min(window.devicePixelRatio, 2)
-        ),
-      },
-    }),
-    [viewport.width, viewport.height]
-  )
 
   useEffect(() => {
     window.addEventListener("mousemove", updateMousePosition, false)
@@ -88,13 +62,39 @@ export default function Experience() {
     )
   })
 
+  const uniforms = useMemo(
+    () => ({
+      uCamPos: { value: camera.position },
+      uCamToWorldMat: { value: camera.matrixWorld },
+      uCamInverseProjMat: { value: camera.projectionMatrixInverse },
+      uInverseModelMat: {
+        value: new Matrix4(),
+      },
+      uTime: {
+        type: "f",
+        value: 1.0,
+      },
+      uMouse: {
+        type: "v2",
+        value: new Vector2(0, 0),
+      },
+      uResolution: {
+        type: "v2",
+        value: new Vector2(viewport.width, viewport.height).multiplyScalar(
+          Math.min(window.devicePixelRatio, 2)
+        ),
+      },
+    }),
+    [viewport.width, viewport.height]
+  )
+
   return (
     <>
       <OrbitControls />
       <mesh
         ref={meshRef}
-        rotation={[Math.PI / 4, Math.PI / 4, Math.PI / 2]}
-        position={[0, 0, 0]}
+        // rotation={[Math.PI / 4, Math.PI / 4, Math.PI / 2]}
+        position={position}
       >
         <boxGeometry args={[1, 1, 1]} />
         <shaderMaterial

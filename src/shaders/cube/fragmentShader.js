@@ -97,11 +97,22 @@ vec3 GetNormal(in vec3 p) {
 	void main() {
 
 		vec2 uv = vUv - 0.5;
-		// vec3 ro = vec3(0., 0., -3.);
-		// vec3 rd = normalize(vec3(uv, 1.));
 
-		vec3 ro = vRayOrigin.xyz; //vec3(0., 0., -3.);
-		vec3 rd = normalize(vHitPos - ro); //normalize(vec3(uv, 1.));
+		vec3 cameraTarget = vec3(0.0, 0.0, 0.0);
+		// vec3 cameraTarget = vHitPos;
+
+		// Compute the right, up, and forward vectors for the camera
+		vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
+		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
+		vec3 up = cross(forward, right);
+
+		// Compute the ray origin based on the orthographic projection
+		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
+		// The ray direction is constant and points towards the target
+		vec3 rd = forward;
+
+		// vec3 ro = vRayOrigin.xyz; 
+		// vec3 rd = normalize(vHitPos - ro); 
 
 		float d = Raymarch(ro, rd);
 

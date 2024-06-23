@@ -18,32 +18,6 @@ export default function Shader({ position }) {
     mousePosition.current = { x: e.pageX, y: e.pageY }
   }, [])
 
-  const uniforms = useMemo(
-    () => ({
-      uCamPos: { value: camera.position },
-      uCamToWorldMat: { value: camera.matrixWorld },
-      uCamInverseProjMat: { value: camera.projectionMatrixInverse },
-      uInverseModelMat: {
-        value: new Matrix4(),
-      },
-      uTime: {
-        type: "f",
-        value: 1.0,
-      },
-      uMouse: {
-        type: "v2",
-        value: new Vector2(0, 0),
-      },
-      uResolution: {
-        type: "v2",
-        value: new Vector2(viewport.width, viewport.height).multiplyScalar(
-          Math.min(window.devicePixelRatio, 2)
-        ),
-      },
-    }),
-    [viewport.width, viewport.height]
-  )
-
   useEffect(() => {
     window.addEventListener("mousemove", updateMousePosition, false)
     console.log("mousePosition", mousePosition)
@@ -86,6 +60,32 @@ export default function Shader({ position }) {
       mousePosition.current.y
     )
   })
+
+  const uniforms = useMemo(
+    () => ({
+      uCamPos: { value: camera.position },
+      uCamToWorldMat: { value: camera.matrixWorld },
+      uCamInverseProjMat: { value: camera.projectionMatrixInverse },
+      uInverseModelMat: {
+        value: new Matrix4(),
+      },
+      uTime: {
+        type: "f",
+        value: 1.0,
+      },
+      uMouse: {
+        type: "v2",
+        value: new Vector2(0, 0),
+      },
+      uResolution: {
+        type: "v2",
+        value: new Vector2(viewport.width, viewport.height).multiplyScalar(
+          Math.min(window.devicePixelRatio, 2)
+        ),
+      },
+    }),
+    [viewport.width, viewport.height]
+  )
 
   return (
     <>
