@@ -1,5 +1,5 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from "react"
-import { Vector2, Matrix4, Vector3 } from "three"
+import { Vector2, Matrix4, Vector3, MathUtils } from "three"
 import { useThree, useFrame } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 
@@ -10,12 +10,22 @@ export default function Experience({ position }) {
   const meshRef = useRef()
   const viewport = useThree((state) => state.viewport)
   const camera = useThree((state) => state.camera)
+  const size = useThree((state) => state.size)
 
   const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
   const mousePosition = useRef({ x: 0, y: 0 })
 
   const forward = new Vector3(0, 0, -1)
+
+  // const nearPlaneWidth =
+  //   camera.near *
+  //   Math.tan(MathUtils.degToRad(camera.fov / 2) * camera.aspect * 2)
+
+  const nearPlaneWidth = (camera.right - camera.left) / camera.zoom
+  const nearPlaneHeight = (camera.top - camera.bottom) / camera.zoom
+
+  console.log("nearPlaneWidth", camera.right, camera.left, camera.zoom)
 
   const updateMousePosition = useCallback((e) => {
     mousePosition.current = { x: e.pageX, y: e.pageY }
@@ -93,12 +103,21 @@ export default function Experience({ position }) {
       },
       uResolution: {
         type: "v2",
-        value: new Vector2(viewport.width, viewport.height).multiplyScalar(
+        value: new Vector2(size.width, size.height).multiplyScalar(
           Math.min(window.devicePixelRatio, 2)
         ),
       },
+      uNearPlaneWidth: {
+        type: "f",
+        value: nearPlaneWidth,
+      },
+      uNearPlaneHeight: {
+        type: "f",
+        value: nearPlaneHeight,
+      },
+      viewportSize: { value: new Vector2(viewport.width, viewport.height) },
     }),
-    [viewport.width, viewport.height]
+    [(viewport.width, viewport.height)]
   )
 
   return (

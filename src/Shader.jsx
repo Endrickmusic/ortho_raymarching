@@ -61,8 +61,8 @@ export default function Shader({ position }) {
       mousePosition.current.x,
       mousePosition.current.y
     )
-    meshRef.current.material.uniforms.uForward.value =
-      camera.getWorldDirection(forward)
+    camera.getWorldDirection(forward)
+    meshRef.current.material.uniforms.uForward.value = forward
   })
 
   const uniforms = useMemo(

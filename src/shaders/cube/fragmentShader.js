@@ -9,6 +9,9 @@ uniform float divideFactor;
 uniform int count;
 uniform float uSize;
 uniform vec3 uForward;
+uniform float uNearPlaneWidth;
+uniform float uNearPlaneHeight;
+uniform vec2 viewportSize;
 
 varying vec2 vUv;
 varying vec4 vPosition;
@@ -56,8 +59,8 @@ float opSmoothUnion( float d1, float d2, float k ) {
 
 float GetDist(vec3 p) {
 
-	float d = length(p) - 1.; // sphere
-	d = length(vec2(length(p.xz) - .4, p.y)) - .1;
+	float d = length(p) - .3; // sphere
+	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
 	return d;
 }
 
@@ -97,31 +100,47 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		vec2 uv = vUv - .5;
+		    // Calculate viewport UVs
+		vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
+		uv = uv * 2.0 - 1.0; // Transform UVs from [0, 1] to [-1, 1]
 
-		vec3 cameraTarget = uForward;
-		// vec3 cameraTarget = vHitPos;
-		// vec3 cameraTarget = vec3(0., 0., 0.);
+		// Calculate ray origin for orthographic projection
+		// vec3 ro = vec3((uv.x * uNearPlaneWidth) / 2.0, (uv.y * uNearPlaneHeight) / 2.0, 1.0) + vRayOrigin.xyz;
 
-		// Compute the right, up, and forward vectors for the camera
-		vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
+		// Ray direction is constant for orthographic projection
+		// vec3 rd = normalize(uForward);
+
+		// Perform raymarching from the ray origin in the direction
+		// float d = Raymarch(ro, rd);
+
+		// // vec2 uv = vUv - .5;
+		// vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy) * 2. - 1.;
+
+		// vec3 cameraTarget = uForward * 10.0;
+		// // vec3 cameraTarget = vec3(0., 0., 0.);
+
+		// // Compute the right, up, and forward vectors for the camera
+		// vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
+		vec3 forward = normalize(uForward);
 		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 		vec3 up = cross(forward, right);
 
-		// Compute the ray origin based on the orthographic projection
+		// // Compute the ray origin based on the orthographic projection
 		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
-		// The ray direction is constant and points towards the target
-		vec3 rd = forward;
+		// vec3 ro = vec3(uv.x * 4.0, uv.y * 4.0, 1.0);
+		// // The ray direction is constant and points towards the target
+		vec3 rd = normalize(uForward);
 
-		// vec3 ro = vRayOrigin.xyz; 
-		// vec3 rd = normalize(vHitPos - ro); 
+		// // vec3 ro = vRayOrigin.xyz; 
+		// // vec3 rd = normalize(vHitPos - ro); 
 
 		float d = Raymarch(ro, rd);
 
-		vec3 col = vec3(0.0);
+		vec3 col = vec3(0.0); 
 
 		if ( d >= MAX_DIST )
-			discard;
+			// discard;
+			col = vec3(0.5);
 		else {
 			vec3 p = ro + rd * d;
 			vec3 n = GetNormal(p);
