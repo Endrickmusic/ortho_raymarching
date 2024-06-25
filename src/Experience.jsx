@@ -1,5 +1,5 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from "react"
-import { Vector2, Matrix4 } from "three"
+import { Vector2, Matrix4, Vector3 } from "three"
 import { useThree, useFrame } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 
@@ -14,6 +14,8 @@ export default function Experience({ position }) {
   const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
   const mousePosition = useRef({ x: 0, y: 0 })
+
+  const forward = new Vector3(0, 0, -1)
 
   const updateMousePosition = useCallback((e) => {
     mousePosition.current = { x: e.pageX, y: e.pageY }
@@ -60,6 +62,13 @@ export default function Experience({ position }) {
       mousePosition.current.x,
       mousePosition.current.y
     )
+    camera.getWorldDirection(forward)
+    meshRef.current.material.uniforms.uForward.value = forward
+
+    // console.log(
+    //   "camera.getWorldDirection(forward)",
+    //   camera.getWorldDirection(forward)
+    // )
   })
 
   const uniforms = useMemo(
@@ -77,6 +86,10 @@ export default function Experience({ position }) {
       uMouse: {
         type: "v2",
         value: new Vector2(0, 0),
+      },
+      uForward: {
+        type: "v3",
+        value: new Vector3(0, 0, -1),
       },
       uResolution: {
         type: "v2",

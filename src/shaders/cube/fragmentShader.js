@@ -8,6 +8,7 @@ uniform float dispersionOffset;
 uniform float divideFactor;
 uniform int count;
 uniform float uSize;
+uniform vec3 uForward;
 
 varying vec2 vUv;
 varying vec4 vPosition;
@@ -96,10 +97,11 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		vec2 uv = vUv - 0.5;
+		vec2 uv = vUv - .5;
 
-		vec3 cameraTarget = vec3(0.0, 0.0, 0.0);
+		vec3 cameraTarget = uForward;
 		// vec3 cameraTarget = vHitPos;
+		// vec3 cameraTarget = vec3(0., 0., 0.);
 
 		// Compute the right, up, and forward vectors for the camera
 		vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);

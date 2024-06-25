@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, useEffect, useCallback } from "react"
-import { Vector2, Matrix4 } from "three"
+import { Vector2, Vector3, Matrix4 } from "three"
 import { useThree, useFrame } from "@react-three/fiber"
 
 import fragmentShader from "./shaders/orthographic/fragmentShader.js"
@@ -13,6 +13,8 @@ export default function Shader({ position }) {
   const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
   const mousePosition = useRef({ x: 0, y: 0 })
+
+  const forward = new Vector3(0, 0, -1)
 
   const updateMousePosition = useCallback((e) => {
     mousePosition.current = { x: e.pageX, y: e.pageY }
@@ -59,6 +61,8 @@ export default function Shader({ position }) {
       mousePosition.current.x,
       mousePosition.current.y
     )
+    meshRef.current.material.uniforms.uForward.value =
+      camera.getWorldDirection(forward)
   })
 
   const uniforms = useMemo(
@@ -77,6 +81,10 @@ export default function Shader({ position }) {
         type: "v2",
         value: new Vector2(0, 0),
       },
+      uForward: {
+        type: "v3",
+        value: forward,
+      },
       uResolution: {
         type: "v2",
         value: new Vector2(viewport.width, viewport.height).multiplyScalar(
@@ -90,7 +98,7 @@ export default function Shader({ position }) {
   return (
     <>
       <mesh position={position} ref={meshRef}>
-        <planeGeometry args={[2, 1.5]} />
+        <planeGeometry args={[1, 1]} />
         <shaderMaterial
           uniforms={uniforms}
           fragmentShader={fragmentShader}
