@@ -12,11 +12,15 @@ uniform vec3 uForward;
 uniform float uNearPlaneWidth;
 uniform float uNearPlaneHeight;
 uniform vec2 viewportSize;
+uniform vec3 uObjectScale;
+uniform float uCamZoom;
 
-varying vec2 vUv;
+varying vec3 vUv;
 varying vec4 vPosition;
 varying vec4 vRayOrigin;
 varying vec3 vHitPos;
+varying vec2 vScreenSpaceOrigin;
+varying vec4 vClipSpacePos;
 
 const float PI = 3.1415926;
 const float HALF_PI = 0.5 * PI;
@@ -57,24 +61,24 @@ float opSmoothUnion( float d1, float d2, float k ) {
 
 #define BALL_NUM 5
 
-float GetDist(vec3 p) {
-
-	float d = length(p) - .3; // sphere
-	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
-	return d;
-}
-
 // float GetDist(vec3 p) {
-// 	float d = 1e5;
-// 	for(int i = 0; i < BALL_NUM; i++) {
-// 		float fi = float(i) + 0.01;
-// 		float r = uSize * 0.1;
-// 		// float r = uSize * 0.1 * hash(fi);
-// 		vec3 offset = .5 * sin(hash3(fi)) * cos(uTime + float(i));
-// 		d = opSmoothUnion(d, sphere(p - offset, r), 0.24);
-// 	}
+
+// 	float d = length(p) - .3; // sphere
+// 	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
 // 	return d;
 // }
+
+float GetDist(vec3 p) {
+	float d = 1e5;
+	for(int i = 0; i < BALL_NUM; i++) {
+		float fi = float(i) + 0.001;
+		float r = uSize * 0.27;
+		// float r = uSize * 0.1 * hash(fi);
+		vec3 offset = .22 * sin(hash3(fi)) * cos(uTime + float(i));
+		d = opSmoothUnion(d, sphere(p - offset, r), 0.22);
+	}
+	return d;
+}
 
 float Raymarch(vec3 ro, vec3 rd) {
 	float dO = 0.;
@@ -100,10 +104,16 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		    // Calculate viewport UVs
-		vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
-		uv = uv * 2.0 - 1.0; // Transform UVs from [0, 1] to [-1, 1]
-
+		// vec3 uv = vUv;
+		// Calculate viewport UVs
+		vec2 uv = vUv.xy - (vClipSpacePos.xy / 2.);
+		// uv = uv * 2.0 - 1.0; // Transform UVs from [0, 1] to [-1, 1]
+		// vec3 uv = vClipSpacePos.xyz / vClipSpacePos.w;
+		// Scale UVs with the object scale
+		// Assuming the object's scale affects UVs uniformly, you might only use one component (e.g., x or y)
+		// uv *= 1.0;
+		// uv -= vScreenSpaceOrigin;
+		// uv *= uCamZoom;
 		// Calculate ray origin for orthographic projection
 		// vec3 ro = vec3((uv.x * uNearPlaneWidth) / 2.0, (uv.y * uNearPlaneHeight) / 2.0, 1.0) + vRayOrigin.xyz;
 
@@ -134,22 +144,23 @@ vec3 GetNormal(in vec3 p) {
 		// // vec3 ro = vRayOrigin.xyz; 
 		// // vec3 rd = normalize(vHitPos - ro); 
 
-		float d = Raymarch(ro, rd);
+		// float d = Raymarch(ro, rd);
 
-		vec3 col = vec3(0.0); 
+		// vec3 col = vec3(0.0); 
 
-		if ( d >= MAX_DIST )
-			// discard;
-			col = vec3(0.5);
-		else {
-			vec3 p = ro + rd * d;
-			vec3 n = GetNormal(p);
-			col.rgb = n;
-		}
-        gl_FragColor = vec4(col, 1.0);
+		// if ( d >= MAX_DIST )
+		// 	// discard;
+		// 	col = vec3(0.5);
+		// else {
+		// 	vec3 p = ro + rd * d;
+		// 	vec3 n = GetNormal(p);
+		// 	col.rgb = n;
+		// }
+        // gl_FragColor = vec4(col, 1.0);
         // gl_FragColor = vec4(rd, 1.0);
 		// gl_FragColor = vec4(0., 0., 1., 1.0);
-		// gl_FragColor = vec4(uv, 0.0, 1.0);
+		// gl_FragColor = vec4(uv, 1.0);
+		gl_FragColor = vec4(uv, 0.0, 1.0);
 	}
 `
 
