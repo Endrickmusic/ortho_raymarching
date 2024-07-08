@@ -121,7 +121,7 @@ vec3 GetNormal(in vec3 p) {
 
 		// // Compute the right, up, and forward vectors for the camera
 		// vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
-		vec3 forward = normalize(uForward);
+		vec3 forward = - normalize(uForward);
 		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 		vec3 up = cross(forward, right);
 
