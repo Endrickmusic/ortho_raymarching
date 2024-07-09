@@ -18,6 +18,7 @@ void main() {
     vUv = uv;
     vPosition = worldPosition;
     vRayOrigin = uInverseModelMat * vec4(uCamPos, 1.0);
+    // vRayOrigin = vec4(uCamPos, 1.0);
     // vHitPos = worldPosition.xyz;
     vHitPos = position;
 }

@@ -12,7 +12,7 @@ export default function App() {
       {/* <Canvas shadows camera={{ position: [0, 0, 5], fov: 40 }}> */}
       <Environment files="./textures/envmap.hdr" />
       <color attach="background" args={["#eeeeee"]} />
-      <Experience position={[0, 0, 0]} />
+      <Experience position={[0.5, 0, 0]} />
       <Shader position={[-2, 0, 0]} />
     </Canvas>
   )

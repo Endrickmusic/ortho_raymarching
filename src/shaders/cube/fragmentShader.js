@@ -12,11 +12,19 @@ uniform vec3 uForward;
 uniform float uNearPlaneWidth;
 uniform float uNearPlaneHeight;
 uniform vec2 viewportSize;
+uniform mat4 uInverseModelMat;
+
+uniform vec3 uCamPos;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uModelViewMatrix;
 
 varying vec2 vUv;
 varying vec4 vPosition;
 varying vec4 vRayOrigin;
 varying vec3 vHitPos;
+varying mat4 vModelMatrix;
+varying vec3 vWorldPos;
+varying vec4 vClipPos;
 
 const float PI = 3.1415926;
 const float HALF_PI = 0.5 * PI;
@@ -35,18 +43,6 @@ vec3 hash3(in float v) { return vec3(hash(v), hash(v*99.), hash(v*9999.)); }
 float sphere(in vec3 p, in float r) { 
     float d = length(p) - r; 
 
-    // sin displacement
-    // d += sin(p.x * 8. + uTime) * 0.1;
-
-    // texture displacement
-    // vec2 uv = vec2(atan(p.x, p.z) / TWO_PI, p.y / 5.);
-    // vec2 uv = vec2(0.5 + atan(p.z, p.x) / (2.0 * PI), 0.5 - asin(p.y) / PI);
-    // float noise = texture2D(uNoiseTexture, uv).r;
-    // float displacement = sin(p.x * 3.0 + uTime * 1. + noise) * 0.001
-    // ;
-    // displacement *= smoothstep(0.8, -0.8, p.y); // reduce displacement at the poles
-    // d += displacement;
-
     return d;
     }
 
@@ -60,21 +56,10 @@ float opSmoothUnion( float d1, float d2, float k ) {
 float GetDist(vec3 p) {
 
 	float d = length(p) - .3; // sphere
-	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
+	d = length(vec2(length(p.xz) - .25, p.y)) - .08;
 	return d;
 }
 
-// float GetDist(vec3 p) {
-// 	float d = 1e5;
-// 	for(int i = 0; i < BALL_NUM; i++) {
-// 		float fi = float(i) + 0.01;
-// 		float r = uSize * 0.1;
-// 		// float r = uSize * 0.1 * hash(fi);
-// 		vec3 offset = .5 * sin(hash3(fi)) * cos(uTime + float(i));
-// 		d = opSmoothUnion(d, sphere(p - offset, r), 0.24);
-// 	}
-// 	return d;
-// }
 
 float Raymarch(vec3 ro, vec3 rd) {
 	float dO = 0.;
@@ -100,39 +85,29 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		    // Calculate viewport UVs
-		vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
-		uv = uv * 2.0 - 1.0; // Transform UVs from [0, 1] to [-1, 1]
+		// Calculate NDC coordinates
+    	vec2 ndc = vClipPos.xy / vClipPos.w;
+    
+    	// Calculate view space coordinates
+    	vec4 viewSpace = inverse(uProjectionMatrix) * vec4(ndc, -1.0, 1.0);
+    	viewSpace /= viewSpace.w;
 
-		// Calculate ray origin for orthographic projection
-		// vec3 ro = vec3((uv.x * uNearPlaneWidth) / 2.0, (uv.y * uNearPlaneHeight) / 2.0, 1.0) + vRayOrigin.xyz;
+		// Calculate world space ray origin
+		vec3 rayOrigin = (inverse(uModelViewMatrix) * viewSpace).xyz;
+		
+		// Ray direction is constant in view space for orthographic projection
+		vec3 rayDirection = normalize((inverse(uModelViewMatrix) * vec4(uCamPos, 0.0)).xyz);
+		
+		// Transform to object space if needed
+		vec3 ro = (uInverseModelMat * vec4(rayOrigin, 1.0)).xyz;
+		vec3 rd = normalize((uInverseModelMat * vec4(rayDirection, 0.0)).xyz);
+    
 
-		// Ray direction is constant for orthographic projection
-		// vec3 rd = normalize(uForward);
 
-		// Perform raymarching from the ray origin in the direction
-		// float d = Raymarch(ro, rd);
 
-		// // vec2 uv = vUv - .5;
-		// vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy) * 2. - 1.;
-
-		// vec3 cameraTarget = uForward * 10.0;
-		// // vec3 cameraTarget = vec3(0., 0., 0.);
-
-		// // Compute the right, up, and forward vectors for the camera
-		// vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
-		vec3 forward = - normalize(uForward);
-		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
-		vec3 up = cross(forward, right);
-
-		// // Compute the ray origin based on the orthographic projection
-		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
-		// vec3 ro = vec3(uv.x * 4.0, uv.y * 4.0, 1.0);
-		// // The ray direction is constant and points towards the target
-		vec3 rd = normalize(uForward);
-
-		// // vec3 ro = vRayOrigin.xyz; 
-		// // vec3 rd = normalize(vHitPos - ro); 
+		// vec3 ro = (uInverseModelMat * vec4(vRayOrigin.xyz + uv.x * right + uv.y * up, 1.0)).xyz;
+		// // vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
+		// vec3 rd = normalize((uInverseModelMat * vec4(uForward, 1.0)).xyz);
 
 		float d = Raymarch(ro, rd);
 
@@ -147,9 +122,6 @@ vec3 GetNormal(in vec3 p) {
 			col.rgb = n;
 		}
         gl_FragColor = vec4(col, 1.0);
-        // gl_FragColor = vec4(rd, 1.0);
-		// gl_FragColor = vec4(0., 0., 1., 1.0);
-		// gl_FragColor = vec4(uv, 0.0, 1.0);
 	}
 `
 

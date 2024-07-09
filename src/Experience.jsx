@@ -8,6 +8,7 @@ import fragmentShader from "./shaders/cube/fragmentShader.js"
 
 export default function Experience({ position }) {
   const meshRef = useRef()
+  const materialRef = useRef()
   const viewport = useThree((state) => state.viewport)
   const camera = useThree((state) => state.camera)
   const size = useThree((state) => state.size)
@@ -42,15 +43,16 @@ export default function Experience({ position }) {
   useEffect(() => {
     const object = meshRef.current
 
-    if (object) {
-      object.updateMatrixWorld()
-      const worldMatrix = object.matrixWorld
-      const inverseMatrix = new Matrix4().copy(worldMatrix).invert()
-      setWorldToObjectMatrix(inverseMatrix)
-      console.log("World to Object Matrix:", inverseMatrix)
-      meshRef.current.material.uniforms.uInverseModelMat.value = inverseMatrix
-      meshRef.current.updateMatrixWorld()
-    }
+    // if (object) {
+    //   object.updateMatrixWorld()
+    //   const worldMatrix = object.matrixWorld
+    //   const inverseMatrix = new Matrix4().copy(worldMatrix).invert()
+    // materialRef.current.uniforms.uInverseModelMat = { value: new Matrix4() }
+    //   setWorldToObjectMatrix(inverseMatrix)
+    //   console.log("World to Object Matrix:", inverseMatrix)
+    //   meshRef.current.material.uniforms.uInverseModelMat.value = inverseMatrix
+    //   meshRef.current.updateMatrixWorld()
+    // }
   }, [
     meshRef.current?.position,
     meshRef.current?.rotation,
@@ -62,27 +64,38 @@ export default function Experience({ position }) {
 
     if (meshRef.current) {
     }
+    // animation
+    meshRef.current.rotation.x = time * 0.5
+    // meshRef.current.rotation.y = time * 0.3
+
+    meshRef.current.updateMatrixWorld()
+
+    // meshRef.current.material.uniforms.uInverseModelMat.value
+    //   .copy(meshRef.current.worldMatrix)
+    //   .invert()
+    // meshRef.current.material.uniforms.uModelViewMatrix.value.copy(
+    //   meshRef.current.modelViewMatrix
+    // )
+    // meshRef.current.material.uniforms.uProjectionMatrix.value.copy(
+    //   camera.projectionMatrix
+    // )
 
     // Update the uniform
 
-    meshRef.current.material.uniforms.uCamPos.value = camera.position
-    // meshRef.current.material.uniforms.uMouse.value = new Vector2(0, 0)
+    meshRef.current.material.uniforms.uCamPos.value.copy(camera.position)
 
-    meshRef.current.material.uniforms.uMouse.value = new Vector2(
-      mousePosition.current.x,
-      mousePosition.current.y
+    meshRef.current.material.uniforms.uMouse.value.copy(
+      new Vector2(mousePosition.current.x, mousePosition.current.y)
     )
     camera.getWorldDirection(forward)
-    meshRef.current.material.uniforms.uForward.value = forward
-
-    // console.log(
-    //   "camera.getWorldDirection(forward)",
-    //   camera.getWorldDirection(forward)
-    // )
+    meshRef.current.material.uniforms.uForward.value.copy(forward)
+    materialRef.current.needsUpdate = true
   })
 
   const uniforms = useMemo(
     () => ({
+      uProjectionMatrix: { value: new Matrix4() },
+      uModelViewMatrix: { value: new Matrix4() },
       uCamPos: { value: camera.position },
       uCamToWorldMat: { value: camera.matrixWorld },
       uCamInverseProjMat: { value: camera.projectionMatrixInverse },
@@ -125,11 +138,12 @@ export default function Experience({ position }) {
       <OrbitControls />
       <mesh
         ref={meshRef}
-        // rotation={[Math.PI / 4, Math.PI / 4, Math.PI / 2]}
+        rotation={[Math.PI / 4, Math.PI / 4, Math.PI / 2]}
         position={position}
       >
         <boxGeometry args={[1, 1, 1]} />
         <shaderMaterial
+          ref={materialRef}
           uniforms={uniforms}
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
