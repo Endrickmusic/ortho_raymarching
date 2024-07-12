@@ -34,19 +34,6 @@ vec3 hash3(in float v) { return vec3(hash(v), hash(v*99.), hash(v*9999.)); }
 
 float sphere(in vec3 p, in float r) { 
     float d = length(p) - r; 
-
-    // sin displacement
-    // d += sin(p.x * 8. + uTime) * 0.1;
-
-    // texture displacement
-    // vec2 uv = vec2(atan(p.x, p.z) / TWO_PI, p.y / 5.);
-    // vec2 uv = vec2(0.5 + atan(p.z, p.x) / (2.0 * PI), 0.5 - asin(p.y) / PI);
-    // float noise = texture2D(uNoiseTexture, uv).r;
-    // float displacement = sin(p.x * 3.0 + uTime * 1. + noise) * 0.001
-    // ;
-    // displacement *= smoothstep(0.8, -0.8, p.y); // reduce displacement at the poles
-    // d += displacement;
-
     return d;
     }
 
@@ -63,18 +50,6 @@ float GetDist(vec3 p) {
 	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
 	return d;
 }
-
-// float GetDist(vec3 p) {
-// 	float d = 1e5;
-// 	for(int i = 0; i < BALL_NUM; i++) {
-// 		float fi = float(i) + 0.01;
-// 		float r = uSize * 0.1;
-// 		// float r = uSize * 0.1 * hash(fi);
-// 		vec3 offset = .5 * sin(hash3(fi)) * cos(uTime + float(i));
-// 		d = opSmoothUnion(d, sphere(p - offset, r), 0.24);
-// 	}
-// 	return d;
-// }
 
 float Raymarch(vec3 ro, vec3 rd) {
 	float dO = 0.;
@@ -100,39 +75,21 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		    // Calculate viewport UVs
+		// Calculate viewport UVs
 		vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
-		uv = uv * 2.0 - 1.0; // Transform UVs from [0, 1] to [-1, 1]
 
-		// Calculate ray origin for orthographic projection
-		// vec3 ro = vec3((uv.x * uNearPlaneWidth) / 2.0, (uv.y * uNearPlaneHeight) / 2.0, 1.0) + vRayOrigin.xyz;
+		// Transform UVs from [0, 1] to [-1, 1]
+		uv = uv * 2.0 - 1.0; 
 
-		// Ray direction is constant for orthographic projection
-		// vec3 rd = normalize(uForward);
-
-		// Perform raymarching from the ray origin in the direction
-		// float d = Raymarch(ro, rd);
-
-		// // vec2 uv = vUv - .5;
-		// vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy) * 2. - 1.;
-
-		// vec3 cameraTarget = uForward * 10.0;
-		// // vec3 cameraTarget = vec3(0., 0., 0.);
-
-		// // Compute the right, up, and forward vectors for the camera
-		// vec3 forward = normalize(cameraTarget - vRayOrigin.xyz);
 		vec3 forward = - normalize(uForward);
 		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 		vec3 up = cross(forward, right);
 
 		// // Compute the ray origin based on the orthographic projection
 		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
-		// vec3 ro = vec3(uv.x * 4.0, uv.y * 4.0, 1.0);
-		// // The ray direction is constant and points towards the target
-		vec3 rd = normalize(uForward);
 
-		// // vec3 ro = vRayOrigin.xyz; 
-		// // vec3 rd = normalize(vHitPos - ro); 
+		// // The ray direction is constant
+		vec3 rd = normalize(uForward);
 
 		float d = Raymarch(ro, rd);
 
