@@ -17,8 +17,8 @@ void main() {
     gl_Position = projectionMatrix * worldPosition;
     vUv = uv;
     vPosition = worldPosition;
-    vRayOrigin = uInverseModelMat * vec4(uCamPos, 1.0);
-    // vHitPos = worldPosition.xyz;
+    // vRayOrigin = uInverseModelMat * vec4(uCamPos, 1.0);
+    vRayOrigin = vec4(uCamPos, 1.0);
     vHitPos = position;
 }
 

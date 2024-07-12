@@ -1,17 +1,9 @@
 const fragmentShader = `
 
 uniform float uTime;
-uniform float progress;
-uniform sampler2D texture01;
 uniform vec4 uResolution;
-uniform float dispersionOffset;
-uniform float divideFactor;
-uniform int count;
 uniform float uSize;
 uniform vec3 uForward;
-uniform float uNearPlaneWidth;
-uniform float uNearPlaneHeight;
-uniform vec2 viewportSize;
 uniform mat4 uInverseModelMat;
 
 varying vec2 vUv;

@@ -11,74 +11,38 @@ export default function Experience({ position }) {
   const viewport = useThree((state) => state.viewport)
   const camera = useThree((state) => state.camera)
   const size = useThree((state) => state.size)
+  const inverseMatrix = useRef(new Matrix4())
 
   const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
-  const mousePosition = useRef({ x: 0, y: 0 })
-
   const forward = new Vector3(0, 0, -1)
-
-  // const nearPlaneWidth =
-  //   camera.near *
-  //   Math.tan(MathUtils.degToRad(camera.fov / 2) * camera.aspect * 2)
-
-  const nearPlaneWidth = (camera.right - camera.left) / camera.zoom
-  const nearPlaneHeight = (camera.top - camera.bottom) / camera.zoom
-
-  console.log("nearPlaneWidth", camera.right, camera.left, camera.zoom)
-
-  const updateMousePosition = useCallback((e) => {
-    mousePosition.current = { x: e.pageX, y: e.pageY }
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener("mousemove", updateMousePosition, false)
-    console.log("mousePosition", mousePosition)
-    return () => {
-      window.removeEventListener("mousemove", updateMousePosition, false)
-    }
-  }, [updateMousePosition])
-
-  useEffect(() => {
-    const object = meshRef.current
-
-    if (object) {
-      object.updateMatrixWorld()
-      const worldMatrix = object.matrixWorld
-      const inverseMatrix = new Matrix4().copy(worldMatrix).invert()
-      setWorldToObjectMatrix(inverseMatrix)
-      console.log("World to Object Matrix:", inverseMatrix)
-      meshRef.current.material.uniforms.uInverseModelMat.value = inverseMatrix
-      meshRef.current.updateMatrixWorld()
-    }
-  }, [
-    meshRef.current?.position,
-    meshRef.current?.rotation,
-    meshRef.current?.scale,
-  ])
 
   useFrame((state) => {
     let time = state.clock.getElapsedTime()
 
     if (meshRef.current) {
     }
+    // animation
+    meshRef.current.rotation.x += 0.01
+    meshRef.current.rotation.y += 0.01
 
     // Update the uniform
 
-    meshRef.current.material.uniforms.uCamPos.value = camera.position
-    // meshRef.current.material.uniforms.uMouse.value = new Vector2(0, 0)
+    // inverse model matrix
+    meshRef.current.updateMatrixWorld()
+    const worldMatrix = meshRef.current.matrixWorld
+    const inverseMatrix = new Matrix4()
+    inverseMatrix.copy(worldMatrix).invert()
+    setWorldToObjectMatrix(inverseMatrix)
+    meshRef.current.material.uniforms.uInverseModelMat.value.copy(inverseMatrix)
+    meshRef.current.updateMatrixWorld()
 
-    meshRef.current.material.uniforms.uMouse.value = new Vector2(
-      mousePosition.current.x,
-      mousePosition.current.y
-    )
+    // camera position
+    meshRef.current.material.uniforms.uCamPos.value.copy(camera.position)
+
+    // camera direction
     camera.getWorldDirection(forward)
-    meshRef.current.material.uniforms.uForward.value = forward
-
-    // console.log(
-    //   "camera.getWorldDirection(forward)",
-    //   camera.getWorldDirection(forward)
-    // )
+    meshRef.current.material.uniforms.uForward.value.copy(forward)
   })
 
   const uniforms = useMemo(
@@ -93,10 +57,6 @@ export default function Experience({ position }) {
         type: "f",
         value: 1.0,
       },
-      uMouse: {
-        type: "v2",
-        value: new Vector2(0, 0),
-      },
       uForward: {
         type: "v3",
         value: new Vector3(0, 0, -1),
@@ -106,14 +66,6 @@ export default function Experience({ position }) {
         value: new Vector2(size.width, size.height).multiplyScalar(
           Math.min(window.devicePixelRatio, 2)
         ),
-      },
-      uNearPlaneWidth: {
-        type: "f",
-        value: nearPlaneWidth,
-      },
-      uNearPlaneHeight: {
-        type: "f",
-        value: nearPlaneHeight,
       },
       viewportSize: { value: new Vector2(viewport.width, viewport.height) },
     }),
@@ -125,7 +77,7 @@ export default function Experience({ position }) {
       <OrbitControls />
       <mesh
         ref={meshRef}
-        // rotation={[Math.PI / 4, Math.PI / 4, Math.PI / 2]}
+        rotation={[Math.PI / 8, Math.PI / 8, Math.PI / 8]}
         position={position}
       >
         <boxGeometry args={[1, 1, 1]} />
