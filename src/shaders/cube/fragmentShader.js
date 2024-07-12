@@ -12,6 +12,7 @@ uniform vec3 uForward;
 uniform float uNearPlaneWidth;
 uniform float uNearPlaneHeight;
 uniform vec2 viewportSize;
+uniform mat4 uInverseModelMat;
 
 varying vec2 vUv;
 varying vec4 vPosition;
@@ -74,15 +75,21 @@ vec3 GetNormal(in vec3 p) {
 		// Transform UVs from [0, 1] to [-1, 1]
 		uv = uv * 2.0 - 1.0; 
 
+		// apply aspect ratio
+		uv = uv * vec2(uResolution.x / uResolution.y, 1.0);
+
 		vec3 forward = - normalize(uForward);
 		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 		vec3 up = cross(forward, right);
 
 		// // Compute the ray origin based on the orthographic projection
 		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
+		ro = (uInverseModelMat * vec4(ro, 1.0)).xyz;
 
 		// // The ray direction is constant
 		vec3 rd = normalize(uForward);
+
+		rd = (uInverseModelMat * vec4(rd, 1.0)).xyz; 
 
 		float d = Raymarch(ro, rd);
 
