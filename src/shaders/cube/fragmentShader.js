@@ -32,21 +32,14 @@ const int LOOP = 16;
 float hash(in float v) { return fract(sin(v)*43237.5324); }
 vec3 hash3(in float v) { return vec3(hash(v), hash(v*99.), hash(v*9999.)); }
 
-float sphere(in vec3 p, in float r) { 
-    float d = length(p) - r; 
-    return d;
-    }
-
 float opSmoothUnion( float d1, float d2, float k ) {
     float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
     return mix( d2, d1, h ) - k*h*(1.0-h);
 }
 
-#define BALL_NUM 5
-
 float GetDist(vec3 p) {
 
-	float d = length(p) - .3; // sphere
+	float d = length(p) - .3; 
 	d = length(vec2(length(p.xz) - .15, p.y)) - .02;
 	return d;
 }
