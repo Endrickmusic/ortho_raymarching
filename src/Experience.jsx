@@ -26,6 +26,8 @@ export default function Experience({ position }) {
     meshRef.current.rotation.x += 0.01
     meshRef.current.rotation.y += 0.01
 
+    meshRef.current.position.x = Math.sin(time) * 0.3
+
     // Update the uniform
 
     // inverse model matrix

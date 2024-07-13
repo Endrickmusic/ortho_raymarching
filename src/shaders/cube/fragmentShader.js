@@ -16,10 +16,10 @@ const float HALF_PI = 0.5 * PI;
 const float TWO_PI = 2.0 * PI;
 const int LOOP = 16;
 
-#define MAX_STEPS 40
-#define MAX_DIST 40.
-#define SURF_DIST 1e-3
-#define samples 32
+#define MAX_STEPS 100
+#define MAX_DIST 100.
+#define SURF_DIST 1e-4
+#define samples 64
 #define LOD 
 
 float hash(in float v) { return fract(sin(v)*43237.5324); }
