@@ -5,6 +5,8 @@ uniform vec4 uResolution;
 uniform float uSize;
 uniform vec3 uForward;
 uniform mat4 uInverseModelMat;
+uniform float uZoom;
+uniform vec2 uScreenPosition;
 
 varying vec2 vUv;
 varying vec4 vPosition;
@@ -16,8 +18,8 @@ const float HALF_PI = 0.5 * PI;
 const float TWO_PI = 2.0 * PI;
 const int LOOP = 16;
 
-#define MAX_STEPS 100
-#define MAX_DIST 100.
+#define MAX_STEPS 40
+#define MAX_DIST 40.
 #define SURF_DIST 1e-4
 #define samples 64
 #define LOD 
@@ -66,22 +68,32 @@ vec3 GetNormal(in vec3 p) {
 
 		// Transform UVs from [0, 1] to [-1, 1]
 		uv = uv * 2.0 - 1.0; 
+		float aspectRatio = uResolution.x / uResolution.y;
+		float zoomFactor = 400. / uZoom * 0.624;
+		uv *= zoomFactor; 
+		uv -= uScreenPosition;
 
 		// apply aspect ratio
-		uv = uv * vec2(uResolution.x / uResolution.y, 1.0);
+		// uv = uv * vec2(uResolution.x / uResolution.y, 1.0);
+
+		
 
 		vec3 forward = - normalize(uForward);
 		vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 		vec3 up = cross(forward, right);
 
 		// // Compute the ray origin based on the orthographic projection
-		vec3 ro = vRayOrigin.xyz + uv.x * right + uv.y * up;
-		ro = (uInverseModelMat * vec4(ro, 1.0)).xyz;
+
+
+		// vec3 ro = (vRayOrigin.xyz + uv.x * right * aspectRatio + uv.y * up) * zoomFactor;
+		vec3 rOrigin = (vRayOrigin.xyz + uv.x * right * aspectRatio + uv.y * up);
+
+		vec3 ro = (uInverseModelMat * vec4(rOrigin, 0.0)).xyz;
 
 		// // The ray direction is constant
 		vec3 rd = normalize(uForward);
 
-		rd = (uInverseModelMat * vec4(rd, 1.0)).xyz; 
+		rd = (uInverseModelMat * vec4(rd, 0.0)).xyz; 
 
 		float d = Raymarch(ro, rd);
 

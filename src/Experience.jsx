@@ -12,6 +12,7 @@ export default function Experience({ position }) {
   const camera = useThree((state) => state.camera)
   const size = useThree((state) => state.size)
   const inverseMatrix = useRef(new Matrix4())
+  const aspectRatio = size.width / size.height
 
   const [worldToObjectMatrix, setWorldToObjectMatrix] = useState(new Matrix4())
 
@@ -23,10 +24,10 @@ export default function Experience({ position }) {
     if (meshRef.current) {
     }
     // animation
-    meshRef.current.rotation.x += 0.01
+    // meshRef.current.rotation.x += 0.01
     meshRef.current.rotation.y += 0.01
 
-    meshRef.current.position.x = Math.sin(time) * 0.3
+    // meshRef.current.position.x = Math.sin(time) * 0.9
 
     // Update the uniform
 
@@ -45,6 +46,26 @@ export default function Experience({ position }) {
     // camera direction
     camera.getWorldDirection(forward)
     meshRef.current.material.uniforms.uForward.value.copy(forward)
+
+    // camera zoom
+    meshRef.current.material.uniforms.uZoom.value = camera.zoom
+
+    // Step 1: Get World Position
+    const worldPosition = new Vector3()
+    meshRef.current.getWorldPosition(worldPosition)
+
+    // Step 2: Convert to Clip Space
+    const clipSpacePosition = worldPosition.project(camera)
+
+    // Step 3: Convert to NDC (already done by .project())
+
+    // Step 4: Map to Screen Space
+    // const x = ((clipSpacePosition.x * 400) / camera.zoom) * 0.624
+    // const y = clipSpacePosition.y
+
+    // // Step 5: Pass to Shader
+    // meshRef.current.material.uniforms.uScreenPosition.value.set(x, y)
+    // console.log(x, y)
   })
 
   const uniforms = useMemo(
@@ -69,7 +90,8 @@ export default function Experience({ position }) {
           Math.min(window.devicePixelRatio, 2)
         ),
       },
-      viewportSize: { value: new Vector2(viewport.width, viewport.height) },
+      uZoom: { value: 400 },
+      uScreenPosition: { value: new Vector2() },
     }),
     [(viewport.width, viewport.height)]
   )
