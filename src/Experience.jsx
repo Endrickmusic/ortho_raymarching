@@ -18,6 +18,17 @@ export default function Experience({ position }) {
 
   const forward = new Vector3(0, 0, -1)
 
+  // Update uniforms when viewport changes
+  useEffect(() => {
+    if (meshRef.current && meshRef.current.material) {
+      meshRef.current.material.uniforms.uResolution.value
+        .set(size.width, size.height)
+        .multiplyScalar(Math.min(window.devicePixelRatio, 2))
+    }
+    console.log("Viewport Updated")
+    console.log(meshRef.current.material.uniforms.uResolution.value)
+  }, [viewport.width, viewport.height])
+
   useFrame((state) => {
     let time = state.clock.getElapsedTime()
 
@@ -93,7 +104,7 @@ export default function Experience({ position }) {
       uZoom: { value: 400 },
       uScreenPosition: { value: new Vector2() },
     }),
-    [(viewport.width, viewport.height)]
+    []
   )
 
   return (

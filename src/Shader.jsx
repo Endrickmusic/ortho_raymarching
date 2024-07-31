@@ -28,6 +28,16 @@ export default function Shader({ position }) {
     }
   }, [updateMousePosition])
 
+  // Update uniforms when viewport changes
+  useEffect(() => {
+    if (meshRef.current && meshRef.current.material) {
+      meshRef.current.material.uniforms.uResolution.value
+        .set(viewport.width, viewport.height)
+        .multiplyScalar(Math.min(window.devicePixelRatio, 2))
+    }
+    console.log("Viewport Updated")
+  }, [viewport.width, viewport.height])
+
   useEffect(() => {
     const object = meshRef.current
 
@@ -40,10 +50,12 @@ export default function Shader({ position }) {
       meshRef.current.material.uniforms.uInverseModelMat.value = inverseMatrix
       meshRef.current.updateMatrixWorld()
     }
+    console.log("World Matrix Updated")
   }, [
     meshRef.current?.position,
     meshRef.current?.rotation,
     meshRef.current?.scale,
+    viewport,
   ])
 
   useFrame((state) => {
@@ -92,7 +104,7 @@ export default function Shader({ position }) {
         ),
       },
     }),
-    [viewport.width, viewport.height]
+    []
   )
 
   return (

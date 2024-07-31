@@ -63,15 +63,16 @@ vec3 GetNormal(in vec3 p) {
 
 	void main() {
 
-		// Calculate viewport UVs
+		// vec2 uv = vUv;
+		// // Calculate viewport UVs
 		vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
 
-		// Transform UVs from [0, 1] to [-1, 1]
+		// // Transform UVs from [0, 1] to [-1, 1]
 		uv = uv * 2.0 - 1.0; 
 		float aspectRatio = uResolution.x / uResolution.y;
 		float zoomFactor = 400. / uZoom * 0.624;
 		uv *= zoomFactor; 
-		uv -= uScreenPosition;
+		// uv -= uScreenPosition;
 
 		// apply aspect ratio
 		// uv = uv * vec2(uResolution.x / uResolution.y, 1.0);

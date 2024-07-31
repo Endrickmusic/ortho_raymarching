@@ -11,13 +11,13 @@ export default function App() {
     <Canvas
       orthographic
       shadows
-      camera={{ position: [0, 0, 1], zoom: 400, near: 0.05, far: 100 }}
+      camera={{ position: [0, 0, 1], zoom: 400, near: 0.001, far: 100 }}
     >
       {/* <Canvas shadows camera={{ position: [0, 0, 5], fov: 40 }}> */}
       <Environment files="./textures/envmap.hdr" />
       <color attach="background" args={["#eeeeee"]} />
       <Experience position={[0, 0, 0]} />
-      <Shader position={[-2, 0, 0]} />
+      {/* <Shader position={[-2, 0, 0]} /> */}
     </Canvas>
   )
 }
